@@ -1,7 +1,22 @@
 {
   "permissions": {
     "allow": [
-      "Bash(ls:*)"
+      "Bash(ls:*)",
+      "Bash(wc:*)",
+      "Bash(find:*)",
+      "mcp__xcode__BuildProject",
+      "mcp__xcode__XcodeLS",
+      "mcp__xcode__XcodeGrep",
+      "mcp__xcode__RenderPreview",
+      "Bash(xcrun simctl list:*)",
+      "Bash(xcrun simctl boot:*)",
+      "Bash(open:*)",
+      "Bash(xcodebuild:*)",
+      "Bash(xcrun simctl install:*)",
+      "Bash(xcrun simctl launch:*)",
+      "Bash(xcrun simctl io:*)",
+      "mcp__xcode__XcodeRead",
+      "Bash(xcrun simctl help:*)"
     ],
     "deny": []
   }

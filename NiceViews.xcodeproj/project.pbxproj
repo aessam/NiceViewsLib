@@ -11,6 +11,13 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
+		AABB00012E02000000000001 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = D98C72F22DED5F7C00558901 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = D98C72F92DED5F7C00558901;
+			remoteInfo = NiceViews;
+		};
 		D973EAD82E01ECDA00CD6D1B /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = D98C72F22DED5F7C00558901 /* Project object */;
@@ -21,11 +28,17 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		AABB00022E02000000000002 /* NiceViewsUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = NiceViewsUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		D973EAD42E01ECDA00CD6D1B /* NiceViewsTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = NiceViewsTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		D98C72FA2DED5F7C00558901 /* NiceViews.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = NiceViews.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
+		AABB00032E02000000000003 /* NiceViewsUITests */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = NiceViewsUITests;
+			sourceTree = "<group>";
+		};
 		D973EAD52E01ECDA00CD6D1B /* NiceViewsTests */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			path = NiceViewsTests;
@@ -39,6 +52,13 @@
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
+		AABB00042E02000000000004 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		D973EAD12E01ECDA00CD6D1B /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
@@ -62,6 +82,7 @@
 			children = (
 				D98C72FC2DED5F7C00558901 /* NiceViews */,
 				D973EAD52E01ECDA00CD6D1B /* NiceViewsTests */,
+				AABB00032E02000000000003 /* NiceViewsUITests */,
 				D98C72FB2DED5F7C00558901 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -71,6 +92,7 @@
 			children = (
 				D98C72FA2DED5F7C00558901 /* NiceViews.app */,
 				D973EAD42E01ECDA00CD6D1B /* NiceViewsTests.xctest */,
+				AABB00022E02000000000002 /* NiceViewsUITests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -78,6 +100,27 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
+		AABB00052E02000000000005 /* NiceViewsUITests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = AABB000B2E0200000000000B /* Build configuration list for PBXNativeTarget "NiceViewsUITests" */;
+			buildPhases = (
+				AABB00072E02000000000007 /* Sources */,
+				AABB00042E02000000000004 /* Frameworks */,
+				AABB00062E02000000000006 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				AABB00082E02000000000008 /* PBXTargetDependency */,
+			);
+			fileSystemSynchronizedGroups = (
+				AABB00032E02000000000003 /* NiceViewsUITests */,
+			);
+			name = NiceViewsUITests;
+			productName = NiceViewsUITests;
+			productReference = AABB00022E02000000000002 /* NiceViewsUITests.xctest */;
+			productType = "com.apple.product-type.bundle.ui-testing";
+		};
 		D973EAD32E01ECDA00CD6D1B /* NiceViewsTests */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = D973EADC2E01ECDA00CD6D1B /* Build configuration list for PBXNativeTarget "NiceViewsTests" */;
@@ -134,6 +177,10 @@
 				LastSwiftUpdateCheck = 1640;
 				LastUpgradeCheck = 1640;
 				TargetAttributes = {
+					AABB00052E02000000000005 = {
+						CreatedOnToolsVersion = 16.4;
+						TestTargetID = D98C72F92DED5F7C00558901;
+					};
 					D973EAD32E01ECDA00CD6D1B = {
 						CreatedOnToolsVersion = 16.4;
 						TestTargetID = D98C72F92DED5F7C00558901;
@@ -162,11 +209,19 @@
 			targets = (
 				D98C72F92DED5F7C00558901 /* NiceViews */,
 				D973EAD32E01ECDA00CD6D1B /* NiceViewsTests */,
+				AABB00052E02000000000005 /* NiceViewsUITests */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
+		AABB00062E02000000000006 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		D973EAD22E01ECDA00CD6D1B /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -184,6 +239,13 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
+		AABB00072E02000000000007 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		D973EAD02E01ECDA00CD6D1B /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -201,6 +263,11 @@
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
+		AABB00082E02000000000008 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = D98C72F92DED5F7C00558901 /* NiceViews */;
+			targetProxy = AABB00012E02000000000001 /* PBXContainerItemProxy */;
+		};
 		D973EAD92E01ECDA00CD6D1B /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = D98C72F92DED5F7C00558901 /* NiceViews */;
@@ -209,6 +276,40 @@
 /* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
+		AABB00092E02000000000009 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = VW9YC3A6JM;
+				GENERATE_INFOPLIST_FILE = YES;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.aens.NiceViewsUITests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_TARGET_NAME = NiceViews;
+			};
+			name = Debug;
+		};
+		AABB000A2E0200000000000A /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = VW9YC3A6JM;
+				GENERATE_INFOPLIST_FILE = YES;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.aens.NiceViewsUITests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_TARGET_NAME = NiceViews;
+			};
+			name = Release;
+		};
 		D973EADA2E01ECDA00CD6D1B /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -423,6 +524,15 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
+		AABB000B2E0200000000000B /* Build configuration list for PBXNativeTarget "NiceViewsUITests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				AABB00092E02000000000009 /* Debug */,
+				AABB000A2E0200000000000A /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
 		D973EADC2E01ECDA00CD6D1B /* Build configuration list for PBXNativeTarget "NiceViewsTests" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (

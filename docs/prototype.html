@@ -1,0 +1,998 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NiceViews - Interactive Prototype</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  :root {
+    --phone-w: 390px;
+    --phone-h: 844px;
+    --bezel: 12px;
+    --radius: 48px;
+    --bg: #0e0e10;
+    --surface: #1a1a1e;
+    --text: #f0f0f0;
+    --text-dim: #888;
+    --accent: #4f8cff;
+  }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Helvetica Neue', sans-serif;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-height: 100vh;
+    padding: 24px 16px;
+    overflow-x: hidden;
+  }
+
+  h1 {
+    font-size: 22px;
+    font-weight: 600;
+    margin-bottom: 4px;
+    letter-spacing: -0.3px;
+  }
+
+  .subtitle {
+    color: var(--text-dim);
+    font-size: 13px;
+    margin-bottom: 20px;
+  }
+
+  /* Breadcrumb */
+  .breadcrumb {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: 16px;
+    font-size: 13px;
+    flex-wrap: wrap;
+    justify-content: center;
+    min-height: 20px;
+  }
+
+  .breadcrumb span {
+    color: var(--text-dim);
+    cursor: pointer;
+    transition: color 0.2s;
+  }
+
+  .breadcrumb span:hover { color: var(--accent); }
+  .breadcrumb span.current { color: var(--text); cursor: default; font-weight: 500; }
+  .breadcrumb .sep { color: #444; cursor: default; font-size: 10px; }
+
+  /* Phone frame */
+  .phone-wrapper {
+    position: relative;
+    width: calc(var(--phone-w) + var(--bezel) * 2);
+    height: calc(var(--phone-h) + var(--bezel) * 2);
+    flex-shrink: 0;
+    background: #2a2a2e;
+    border-radius: var(--radius);
+    box-shadow:
+      0 0 0 1px rgba(255,255,255,0.06),
+      0 20px 60px rgba(0,0,0,0.6),
+      0 4px 16px rgba(0,0,0,0.4),
+      inset 0 1px 0 rgba(255,255,255,0.08);
+  }
+
+  .phone-frame {
+    display: none;
+  }
+
+  /* Dynamic Island */
+  .dynamic-island {
+    position: absolute;
+    top: 12px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 126px;
+    height: 36px;
+    background: #000;
+    border-radius: 20px;
+    z-index: 30;
+    pointer-events: none;
+  }
+
+  /* Home indicator */
+  .home-indicator {
+    position: absolute;
+    bottom: 18px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 134px;
+    height: 5px;
+    background: rgba(255,255,255,0.25);
+    border-radius: 3px;
+    z-index: 30;
+    pointer-events: none;
+  }
+
+  /* Screen viewport */
+  .screen-viewport {
+    position: absolute;
+    top: var(--bezel);
+    left: var(--bezel);
+    width: var(--phone-w);
+    height: var(--phone-h);
+    border-radius: calc(var(--radius) - var(--bezel));
+    overflow: hidden;
+    background: #000;
+    z-index: 1;
+  }
+
+  .screen-container {
+    position: relative;
+    width: 100%;
+    height: 100%;
+  }
+
+  .screen {
+    position: absolute;
+    inset: 0;
+    transition: transform 0.35s cubic-bezier(0.25, 0.1, 0.25, 1),
+                opacity 0.35s cubic-bezier(0.25, 0.1, 0.25, 1);
+  }
+
+  .screen img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    user-select: none;
+    -webkit-user-drag: none;
+  }
+
+  .screen.active { transform: translateX(0); opacity: 1; z-index: 2; }
+  .screen.push-out { transform: translateX(-30%); opacity: 0.5; z-index: 1; }
+  .screen.push-in { transform: translateX(100%); opacity: 1; z-index: 2; }
+  .screen.pop-out { transform: translateX(100%); opacity: 0.5; z-index: 1; }
+  .screen.pop-in { transform: translateX(-30%); opacity: 1; z-index: 2; }
+  .screen.hidden { display: none; }
+
+  /* Hotspots overlay */
+  .hotspots-layer {
+    position: absolute;
+    inset: 0;
+    z-index: 5;
+  }
+
+  .hotspot {
+    position: absolute;
+    cursor: pointer;
+    border-radius: 8px;
+    transition: background 0.15s, box-shadow 0.15s;
+  }
+
+  .hotspot:hover {
+    background: rgba(79, 140, 255, 0.15);
+    box-shadow: inset 0 0 0 1.5px rgba(79, 140, 255, 0.4);
+  }
+
+  .hotspot .tooltip {
+    position: absolute;
+    bottom: calc(100% + 6px);
+    left: 50%;
+    transform: translateX(-50%) scale(0.9);
+    background: rgba(0,0,0,0.85);
+    color: #fff;
+    font-size: 11px;
+    padding: 4px 8px;
+    border-radius: 6px;
+    white-space: nowrap;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.15s, transform 0.15s;
+    backdrop-filter: blur(8px);
+  }
+
+  .hotspot:hover .tooltip {
+    opacity: 1;
+    transform: translateX(-50%) scale(1);
+  }
+
+  /* Back button overlay */
+  .back-overlay {
+    position: absolute;
+    top: 54px;
+    left: 6px;
+    z-index: 6;
+    width: 60px;
+    height: 36px;
+    cursor: pointer;
+    border-radius: 8px;
+    transition: background 0.15s;
+  }
+
+  .back-overlay:hover { background: rgba(79, 140, 255, 0.12); }
+
+  .back-overlay svg {
+    position: absolute;
+    top: 50%;
+    left: 12px;
+    transform: translateY(-50%);
+    width: 12px;
+    height: 12px;
+    fill: none;
+    stroke: var(--accent);
+    stroke-width: 2.5;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+
+  /* Scroll indicator */
+  .scroll-toggle {
+    position: absolute;
+    bottom: 50px;
+    right: 10px;
+    z-index: 6;
+    width: 36px;
+    height: 36px;
+    border-radius: 18px;
+    background: rgba(0,0,0,0.6);
+    backdrop-filter: blur(8px);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid rgba(255,255,255,0.12);
+    transition: background 0.15s, transform 0.15s;
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  .scroll-toggle.visible { opacity: 1; pointer-events: auto; }
+  .scroll-toggle:hover { background: rgba(79,140,255,0.3); transform: scale(1.08); }
+
+  .scroll-toggle svg {
+    width: 16px;
+    height: 16px;
+    fill: none;
+    stroke: #fff;
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+
+  /* Controls row */
+  .controls {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-top: 20px;
+    font-size: 13px;
+    color: var(--text-dim);
+  }
+
+  .controls button {
+    background: var(--surface);
+    color: var(--text);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 8px;
+    padding: 8px 16px;
+    font-size: 13px;
+    cursor: pointer;
+    transition: background 0.15s, border-color 0.15s;
+    font-family: inherit;
+  }
+
+  .controls button:hover {
+    background: #252528;
+    border-color: rgba(255,255,255,0.15);
+  }
+
+  .controls button:disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+  }
+
+  .screen-info {
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* Screen map */
+  .screen-map {
+    margin-top: 28px;
+    width: 100%;
+    max-width: 800px;
+  }
+
+  .screen-map h3 {
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--text-dim);
+    margin-bottom: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+  }
+
+  .map-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+    gap: 8px;
+  }
+
+  .map-item {
+    background: var(--surface);
+    border: 1px solid rgba(255,255,255,0.06);
+    border-radius: 8px;
+    padding: 6px;
+    cursor: pointer;
+    transition: border-color 0.15s, transform 0.15s;
+    text-align: center;
+  }
+
+  .map-item:hover {
+    border-color: var(--accent);
+    transform: translateY(-2px);
+  }
+
+  .map-item.active {
+    border-color: var(--accent);
+    box-shadow: 0 0 12px rgba(79,140,255,0.2);
+  }
+
+  .map-item img {
+    width: 100%;
+    aspect-ratio: 402/874;
+    object-fit: cover;
+    border-radius: 4px;
+    display: block;
+    margin-bottom: 4px;
+  }
+
+  .map-item .name {
+    font-size: 10px;
+    color: var(--text-dim);
+    line-height: 1.2;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  /* Hotspot hint indicator */
+  .hint-badge {
+    position: absolute;
+    bottom: 6px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 6;
+    background: rgba(0,0,0,0.7);
+    backdrop-filter: blur(8px);
+    color: rgba(255,255,255,0.7);
+    font-size: 11px;
+    padding: 4px 12px;
+    border-radius: 12px;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.3s;
+    border: 1px solid rgba(255,255,255,0.08);
+  }
+
+  .hint-badge.visible { opacity: 1; }
+
+  /* No screenshot fallback */
+  .no-screenshot {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(135deg, #1a1a2e, #16213e);
+    color: var(--text-dim);
+    font-size: 14px;
+    text-align: center;
+    padding: 40px;
+    gap: 12px;
+  }
+
+  .no-screenshot .icon { font-size: 40px; opacity: 0.4; }
+  .no-screenshot .label { font-weight: 500; color: var(--text); }
+</style>
+</head>
+<body>
+
+<h1>NiceViews Interactive Prototype</h1>
+<p class="subtitle">Click on menu items to navigate through the app</p>
+
+<div class="breadcrumb" id="breadcrumb"></div>
+
+<div class="phone-wrapper">
+  <div class="phone-frame"></div>
+  <div class="dynamic-island"></div>
+  <div class="home-indicator"></div>
+  <div class="screen-viewport">
+    <div class="screen-container" id="screenContainer"></div>
+    <div class="hotspots-layer" id="hotspotsLayer"></div>
+    <div class="back-overlay" id="backBtn" style="display:none" onclick="goBack()">
+      <svg viewBox="0 0 12 12"><polyline points="8,1 3,6 8,11"/></svg>
+    </div>
+    <div class="scroll-toggle" id="scrollToggle" onclick="toggleScroll()">
+      <svg viewBox="0 0 16 16"><polyline points="4,6 8,10 12,6"/></svg>
+    </div>
+    <div class="hint-badge" id="hintBadge">Tap highlighted areas to navigate</div>
+  </div>
+</div>
+
+<div class="controls">
+  <button id="backControl" onclick="goBack()" disabled>&larr; Back</button>
+  <span class="screen-info" id="screenInfo"></span>
+  <button onclick="goHome()">Home</button>
+</div>
+
+<div class="screen-map">
+  <h3>All Screens</h3>
+  <div class="map-grid" id="mapGrid"></div>
+</div>
+
+<script>
+// ── Screen definitions ──
+// Point dimensions of iPhone 17 Pro
+const POINT_W = 402;
+const POINT_H = 874;
+const DISPLAY_W = 390;
+const SCALE = DISPLAY_W / POINT_W;
+
+const screens = {
+  main_menu: {
+    title: "Main Menu",
+    image: "tour/main_menu.png",
+    parent: null,
+    hotspots: []
+  },
+  components_catalog: {
+    title: "Components Catalog",
+    image: "tour/components_catalog.png",
+    parent: "main_menu",
+    hotspots: []
+  },
+  views_catalog: {
+    title: "Views Catalog",
+    image: "tour/views_catalog.png",
+    parent: "main_menu",
+    hotspots: []
+  },
+  chat_experience: {
+    title: "Chat Experience",
+    image: "tour/chat_experience.png",
+    parent: "main_menu",
+    hotspots: []
+  },
+  component_playground: {
+    title: "Component Playground",
+    image: "tour/component_playground.png",
+    scrolled: "tour/component_playground_scrolled.png",
+    parent: "main_menu",
+    hotspots: []
+  },
+  animation_showcase: {
+    title: "Animation Showcase",
+    image: "tour/animation_showcase.png",
+    scrolled: "tour/animation_showcase_scrolled.png",
+    parent: "main_menu",
+    hotspots: []
+  },
+  component_states: {
+    title: "Component States",
+    image: "tour/component_states.png",
+    scrolled: "tour/component_states_scrolled.png",
+    parent: "main_menu",
+    hotspots: []
+  },
+  // Component demos
+  comp_media_card: {
+    title: "Media Card Styles",
+    image: "tour/comp_media_card.png",
+    scrolled: "tour/comp_media_card_scrolled.png",
+    parent: "components_catalog",
+    hotspots: []
+  },
+  comp_list_item: {
+    title: "List Item Styles",
+    image: "tour/comp_list_item.png",
+    scrolled: "tour/comp_list_item_scrolled.png",
+    parent: "components_catalog",
+    hotspots: []
+  },
+  comp_bottom_tab_bar: {
+    title: "Bottom Tab Bar",
+    image: "tour/comp_bottom_tab_bar.png",
+    scrolled: "tour/comp_bottom_tab_bar_scrolled.png",
+    parent: "components_catalog",
+    hotspots: []
+  },
+  comp_tab_selector: {
+    title: "Tab Selector",
+    image: "tour/comp_tab_selector.png",
+    scrolled: "tour/comp_tab_selector_scrolled.png",
+    parent: "components_catalog",
+    hotspots: []
+  },
+  comp_hero_section: {
+    title: "Hero Section",
+    image: "tour/comp_hero_section.png",
+    scrolled: "tour/comp_hero_section_scrolled.png",
+    parent: "components_catalog",
+    hotspots: []
+  },
+  comp_search_bar: {
+    title: "Search Bar",
+    image: "tour/comp_search_bar.png",
+    scrolled: "tour/comp_search_bar_scrolled.png",
+    parent: "components_catalog",
+    hotspots: []
+  },
+  comp_user_avatar: {
+    title: "User Avatar",
+    image: "tour/comp_user_avatar.png",
+    scrolled: "tour/comp_user_avatar_scrolled.png",
+    parent: "components_catalog",
+    hotspots: []
+  },
+  comp_status_badges: {
+    title: "Status Badges",
+    image: "tour/comp_status_badges.png",
+    scrolled: "tour/comp_status_badges_scrolled.png",
+    parent: "components_catalog",
+    hotspots: []
+  },
+  comp_action_buttons: {
+    title: "Action Buttons",
+    image: "tour/comp_action_buttons.png",
+    scrolled: "tour/comp_action_buttons_scrolled.png",
+    parent: "components_catalog",
+    hotspots: []
+  },
+  comp_icon_buttons: {
+    title: "Icon Buttons",
+    image: "tour/comp_icon_buttons.png",
+    scrolled: "tour/comp_icon_buttons_scrolled.png",
+    parent: "components_catalog",
+    hotspots: []
+  },
+  comp_section_headers: {
+    title: "Section Headers",
+    image: "tour/comp_section_headers.png",
+    scrolled: "tour/comp_section_headers_scrolled.png",
+    parent: "components_catalog",
+    hotspots: []
+  },
+  comp_horizontal_scroll: {
+    title: "Horizontal Scroll",
+    image: "tour/comp_horizontal_scroll.png",
+    scrolled: "tour/comp_horizontal_scroll_scrolled.png",
+    parent: "components_catalog",
+    hotspots: []
+  },
+  // View demos
+  view_home: {
+    title: "Home View",
+    image: "tour/view_home.png",
+    scrolled: "tour/view_home_scrolled.png",
+    parent: "views_catalog",
+    hotspots: []
+  },
+  view_home_alt: {
+    title: "Home View Alternative",
+    image: "tour/view_home_alt.png",
+    scrolled: "tour/view_home_alt_scrolled.png",
+    parent: "views_catalog",
+    hotspots: []
+  },
+  view_pin_home: {
+    title: "Pin Home View",
+    image: "tour/view_pin_home.png",
+    scrolled: "tour/view_pin_home_scrolled.png",
+    parent: "views_catalog",
+    hotspots: []
+  },
+  view_explore: {
+    title: "Explore View",
+    image: "tour/view_explore.png",
+    scrolled: "tour/view_explore_scrolled.png",
+    parent: "views_catalog",
+    hotspots: []
+  },
+  view_explore_alt: {
+    title: "Explore View Alternative",
+    image: "tour/view_explore_alt.png",
+    scrolled: "tour/view_explore_alt_scrolled.png",
+    parent: "views_catalog",
+    hotspots: []
+  },
+  view_library: {
+    title: "Library View",
+    image: "tour/view_library.png",
+    scrolled: "tour/view_library_scrolled.png",
+    parent: "views_catalog",
+    hotspots: []
+  },
+  view_profile: {
+    title: "Profile View",
+    image: "tour/view_profile.png",
+    scrolled: "tour/view_profile_scrolled.png",
+    parent: "views_catalog",
+    hotspots: []
+  },
+  view_album_details: {
+    title: "Album Details View",
+    image: "tour/view_album_details.png",
+    scrolled: "tour/view_album_details_scrolled.png",
+    parent: "views_catalog",
+    hotspots: []
+  },
+  view_video_player: {
+    title: "Video Player View",
+    image: "tour/view_video_player.png",
+    scrolled: "tour/view_video_player_scrolled.png",
+    parent: "views_catalog",
+    hotspots: []
+  },
+  view_search_results: {
+    title: "Search Results View",
+    image: "tour/view_search_results.png",
+    scrolled: "tour/view_search_results_scrolled.png",
+    parent: "views_catalog",
+    hotspots: []
+  },
+  view_for_you: {
+    title: "For You View",
+    image: "tour/view_for_you.png",
+    scrolled: "tour/view_for_you_scrolled.png",
+    parent: "views_catalog",
+    hotspots: []
+  },
+  view_trailer: {
+    title: "Trailer View",
+    image: "tour/view_trailer.png",
+    scrolled: "tour/view_trailer_scrolled.png",
+    parent: "views_catalog",
+    hotspots: []
+  }
+};
+
+// ── Hotspot mappings (label → target screen) ──
+const labelToScreen = {
+  "Components Catalog": "components_catalog",
+  "Views Catalog": "views_catalog",
+  "Chat Experience": "chat_experience",
+  "Component Playground": "component_playground",
+  "Animation Showcase": "animation_showcase",
+  "Component States": "component_states",
+  "Media Card Styles": "comp_media_card",
+  "List Item Styles": "comp_list_item",
+  "Bottom Tab Bar": "comp_bottom_tab_bar",
+  "Tab Selector": "comp_tab_selector",
+  "Hero Section": "comp_hero_section",
+  "Search Bar": "comp_search_bar",
+  "User Avatar": "comp_user_avatar",
+  "Status Badges": "comp_status_badges",
+  "Action Buttons": "comp_action_buttons",
+  "Icon Buttons": "comp_icon_buttons",
+  "Section Headers": "comp_section_headers",
+  "Horizontal Scroll": "comp_horizontal_scroll",
+  "Home View": "view_home",
+  "Home View Alternative": "view_home_alt",
+  "Pin Home View": "view_pin_home",
+  "Explore View": "view_explore",
+  "Explore View Alternative": "view_explore_alt",
+  "Library View": "view_library",
+  "Profile View": "view_profile",
+  "Album Details View": "view_album_details",
+  "Video Player View": "view_video_player",
+  "Search Results View": "view_search_results",
+  "For You View": "view_for_you",
+  "Trailer View": "view_trailer"
+};
+
+// ── Load hotspots from captured JSON data ──
+const capturedHotspots = {
+  "components_catalog": [
+    {"label":"Media Card Styles","x":32,"y":310.17,"w":138.33,"h":20.33},
+    {"label":"List Item Styles","x":32,"y":419.83,"w":116,"h":20.33},
+    {"label":"Bottom Tab Bar","x":32,"y":529.83,"w":118,"h":20.33},
+    {"label":"Tab Selector","x":32,"y":581.83,"w":95.33,"h":20.33},
+    {"label":"Hero Section","x":32,"y":691.5,"w":99,"h":20.33},
+    {"label":"Search Bar","x":32,"y":801.5,"w":83.33,"h":20.33},
+    {"label":"User Avatar","x":32,"y":408.17,"w":88.33,"h":20.33},
+    {"label":"Status Badges","x":32,"y":460.17,"w":110.67,"h":20.33},
+    {"label":"Action Buttons","x":32,"y":570.17,"w":112,"h":20.33},
+    {"label":"Icon Buttons","x":32,"y":622.17,"w":96,"h":20.33},
+    {"label":"Section Headers","x":32,"y":731.83,"w":126,"h":20.33},
+    {"label":"Horizontal Scroll","x":32,"y":783.83,"w":125,"h":20.33}
+  ],
+  "main_menu": [
+    {"label":"Components Catalog","x":59.33,"y":224.17,"w":161,"h":20.33},
+    {"label":"Views Catalog","x":67.67,"y":276.17,"w":108.33,"h":20.33},
+    {"label":"Chat Experience","x":62.33,"y":385.33,"w":125,"h":20.33},
+    {"label":"Component Playground","x":61,"y":452,"w":179.33,"h":20.33},
+    {"label":"Animation Showcase","x":61.33,"y":576.33,"w":158,"h":20.33},
+    {"label":"Component States","x":63.67,"y":643,"w":142.33,"h":20.33}
+  ],
+  "views_catalog": [
+    {"label":"Home View","x":64,"y":310.17,"w":86.67,"h":20.33},
+    {"label":"Home View Alternative","x":64,"y":362.17,"w":172.67,"h":20.33},
+    {"label":"Pin Home View","x":59.67,"y":414.17,"w":114.67,"h":20.33},
+    {"label":"Explore View","x":40,"y":523.83,"w":98,"h":20.33},
+    {"label":"Explore View Alternative","x":40,"y":575.83,"w":184,"h":20.33},
+    {"label":"Library View","x":64.67,"y":685.83,"w":94.33,"h":20.33},
+    {"label":"Profile View","x":59.67,"y":737.83,"w":89.67,"h":20.33},
+    {"label":"Album Details View","x":61,"y":789.83,"w":146.33,"h":20.33},
+    {"label":"Video Player View","x":63.67,"y":841.83,"w":136,"h":20.33},
+    {"label":"Search Results View","x":60.33,"y":622.17,"w":154.33,"h":20.33},
+    {"label":"For You View","x":59.33,"y":731.83,"w":99,"h":20.33},
+    {"label":"Trailer View","x":63.67,"y":783.83,"w":88.33,"h":20.33}
+  ]
+};
+
+// Apply captured hotspots with expanded hit areas
+for (const [screenId, spots] of Object.entries(capturedHotspots)) {
+  if (screens[screenId]) {
+    screens[screenId].hotspots = spots.map(s => {
+      const target = labelToScreen[s.label];
+      // Expand hit area: add generous padding around the text label
+      const padX = 16;
+      const padY = 18;
+      return {
+        x: (s.x - padX) * SCALE,
+        y: (s.y - padY) * SCALE,
+        w: (s.w + padX * 2) * SCALE,
+        h: (s.h + padY * 2) * SCALE,
+        target: target || null,
+        label: s.label
+      };
+    });
+  }
+}
+
+// ── State ──
+let currentScreen = "main_menu";
+let navStack = [];
+let scrolledState = {};
+const screenKeys = Object.keys(screens);
+const totalScreens = screenKeys.length;
+
+// ── DOM Setup ──
+const container = document.getElementById("screenContainer");
+const hotspotsLayer = document.getElementById("hotspotsLayer");
+const backBtn = document.getElementById("backBtn");
+const scrollToggle = document.getElementById("scrollToggle");
+const hintBadge = document.getElementById("hintBadge");
+const breadcrumb = document.getElementById("breadcrumb");
+const screenInfo = document.getElementById("screenInfo");
+const backControl = document.getElementById("backControl");
+const mapGrid = document.getElementById("mapGrid");
+
+// Pre-create all screen elements
+for (const [id, data] of Object.entries(screens)) {
+  const div = document.createElement("div");
+  div.className = "screen hidden";
+  div.id = "screen-" + id;
+  div.dataset.screenId = id;
+
+  if (data.image) {
+    const img = document.createElement("img");
+    img.src = data.image;
+    img.alt = data.title;
+    img.loading = "lazy";
+    div.appendChild(img);
+  } else {
+    const fallback = document.createElement("div");
+    fallback.className = "no-screenshot";
+    fallback.innerHTML = `
+      <div class="icon">📱</div>
+      <div class="label">${data.title}</div>
+      <div>Screenshot not yet captured</div>
+      <div style="font-size:12px;margin-top:8px;">Run the full UI test to capture this screen</div>
+    `;
+    div.appendChild(fallback);
+  }
+  container.appendChild(div);
+}
+
+// Build map grid
+for (const [id, data] of Object.entries(screens)) {
+  const item = document.createElement("div");
+  item.className = "map-item";
+  item.id = "map-" + id;
+  item.onclick = () => navigateDirectTo(id);
+
+  if (data.image) {
+    const img = document.createElement("img");
+    img.src = data.image;
+    img.alt = data.title;
+    img.loading = "lazy";
+    item.appendChild(img);
+  } else {
+    const placeholder = document.createElement("div");
+    placeholder.style.cssText = "width:100%;aspect-ratio:402/874;background:#1a1a2e;border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:20px;opacity:0.4;";
+    placeholder.textContent = "📱";
+    item.appendChild(placeholder);
+  }
+
+  const name = document.createElement("div");
+  name.className = "name";
+  name.textContent = data.title;
+  item.appendChild(name);
+  mapGrid.appendChild(item);
+}
+
+// ── Navigation ──
+function showScreen(screenId, direction) {
+  const prev = document.querySelector(".screen.active");
+  const next = document.getElementById("screen-" + screenId);
+  if (!next) return;
+
+  scrolledState[screenId] = false;
+
+  if (prev && prev !== next) {
+    // Animate transition
+    if (direction === "push") {
+      prev.className = "screen push-out";
+      next.className = "screen push-in";
+      requestAnimationFrame(() => {
+        next.className = "screen active";
+      });
+    } else {
+      prev.className = "screen pop-out";
+      next.className = "screen pop-in";
+      requestAnimationFrame(() => {
+        next.className = "screen active";
+      });
+    }
+    setTimeout(() => {
+      if (prev.className !== "screen active") prev.className = "screen hidden";
+    }, 400);
+  } else {
+    if (prev) prev.className = "screen hidden";
+    next.className = "screen active";
+  }
+
+  currentScreen = screenId;
+  updateHotspots();
+  updateUI();
+}
+
+function updateHotspots() {
+  hotspotsLayer.innerHTML = "";
+  const data = screens[currentScreen];
+  if (!data || !data.hotspots.length) return;
+
+  for (const hs of data.hotspots) {
+    const el = document.createElement("div");
+    el.className = "hotspot";
+    el.style.left = hs.x + "px";
+    el.style.top = hs.y + "px";
+    el.style.width = hs.w + "px";
+    el.style.height = hs.h + "px";
+
+    if (hs.target) {
+      const tip = document.createElement("div");
+      tip.className = "tooltip";
+      tip.textContent = hs.label;
+      el.appendChild(tip);
+      el.onclick = () => navigateTo(hs.target);
+    }
+
+    hotspotsLayer.appendChild(el);
+  }
+}
+
+function navigateTo(screenId) {
+  navStack.push(currentScreen);
+  showScreen(screenId, "push");
+}
+
+function navigateDirectTo(screenId) {
+  // Build the nav stack from root to this screen
+  const stack = [];
+  let curr = screenId;
+  while (screens[curr] && screens[curr].parent) {
+    stack.unshift(screens[curr].parent);
+    curr = screens[curr].parent;
+  }
+  navStack = stack;
+  showScreen(screenId, "push");
+}
+
+function goBack() {
+  if (navStack.length === 0) return;
+  const prev = navStack.pop();
+  showScreen(prev, "pop");
+}
+
+function goHome() {
+  navStack = [];
+  showScreen("main_menu", "pop");
+}
+
+function toggleScroll() {
+  const data = screens[currentScreen];
+  if (!data) return;
+
+  const screenEl = document.getElementById("screen-" + currentScreen);
+  const img = screenEl.querySelector("img");
+  if (!img) return;
+
+  const isScrolled = scrolledState[currentScreen];
+  if (!isScrolled && data.scrolled) {
+    img.src = data.scrolled;
+    scrolledState[currentScreen] = true;
+    // Flip chevron up
+    scrollToggle.querySelector("svg").innerHTML = '<polyline points="4,10 8,6 12,10"/>';
+  } else if (isScrolled && data.image) {
+    img.src = data.image;
+    scrolledState[currentScreen] = false;
+    scrollToggle.querySelector("svg").innerHTML = '<polyline points="4,6 8,10 12,6"/>';
+  }
+}
+
+function updateUI() {
+  const data = screens[currentScreen];
+
+  // Back button
+  const hasParent = data && data.parent;
+  backBtn.style.display = hasParent ? "block" : "none";
+  backControl.disabled = navStack.length === 0;
+
+  // Scroll toggle
+  const hasScrolled = data && data.scrolled;
+  scrollToggle.className = "scroll-toggle" + (hasScrolled ? " visible" : "");
+  scrollToggle.querySelector("svg").innerHTML = '<polyline points="4,6 8,10 12,6"/>';
+
+  // Hint badge
+  const hasHotspots = data && data.hotspots.length > 0;
+  hintBadge.className = "hint-badge" + (hasHotspots ? " visible" : "");
+
+  // Screen info
+  const idx = screenKeys.indexOf(currentScreen) + 1;
+  screenInfo.textContent = `${idx} / ${totalScreens} \u2022 ${data.title}`;
+
+  // Breadcrumb
+  const trail = [];
+  let cur = currentScreen;
+  while (cur) {
+    trail.unshift(cur);
+    cur = screens[cur] ? screens[cur].parent : null;
+  }
+  breadcrumb.innerHTML = trail.map((id, i) => {
+    const isLast = i === trail.length - 1;
+    const sep = i < trail.length - 1 ? '<span class="sep">\u203A</span>' : '';
+    const cls = isLast ? ' class="current"' : '';
+    return `<span${cls} onclick="navigateDirectTo('${id}')">${screens[id].title}</span>${sep}`;
+  }).join("");
+
+  // Map active state
+  document.querySelectorAll(".map-item").forEach(el => el.classList.remove("active"));
+  const activeMap = document.getElementById("map-" + currentScreen);
+  if (activeMap) {
+    activeMap.classList.add("active");
+    activeMap.scrollIntoView({ behavior: "smooth", block: "nearest" });
+  }
+}
+
+// ── Init ──
+showScreen("main_menu", "push");
+
+// Hide hint after first click
+hotspotsLayer.addEventListener("click", () => {
+  hintBadge.classList.remove("visible");
+}, { once: true });
+
+// Keyboard navigation
+document.addEventListener("keydown", (e) => {
+  if (e.key === "Escape" || e.key === "Backspace") {
+    e.preventDefault();
+    goBack();
+  }
+});
+</script>
+
+</body>
+</html>

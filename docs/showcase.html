@@ -1,0 +1,652 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NiceViews — SwiftUI Component Library</title>
+<style>
+  :root {
+    --bg: #0a0a0a;
+    --surface: #141414;
+    --surface2: #1e1e1e;
+    --border: #2a2a2a;
+    --text: #f5f5f7;
+    --text2: #a1a1a6;
+    --accent: #0a84ff;
+    --accent2: #30d158;
+    --gradient1: #6e5ce6;
+    --gradient2: #0a84ff;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Helvetica Neue', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+  }
+  .hero {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 4rem 2rem;
+    background: radial-gradient(ellipse at 50% 0%, rgba(106,90,230,0.15) 0%, transparent 60%);
+    position: relative;
+    overflow: hidden;
+  }
+  .hero::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle at 30% 50%, rgba(10,132,255,0.06) 0%, transparent 50%),
+                radial-gradient(circle at 70% 50%, rgba(110,92,230,0.06) 0%, transparent 50%);
+    animation: float 20s ease-in-out infinite;
+  }
+  @keyframes float {
+    0%, 100% { transform: translate(0, 0) rotate(0deg); }
+    50% { transform: translate(-2%, 2%) rotate(1deg); }
+  }
+  .hero h1 {
+    font-size: clamp(3rem, 8vw, 6rem);
+    font-weight: 800;
+    letter-spacing: -0.03em;
+    background: linear-gradient(135deg, var(--text) 0%, var(--text2) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    position: relative;
+    z-index: 1;
+  }
+  .hero .tagline {
+    font-size: clamp(1.1rem, 2.5vw, 1.5rem);
+    color: var(--text2);
+    max-width: 600px;
+    margin: 1rem auto 2rem;
+    position: relative;
+    z-index: 1;
+  }
+  .badge-row {
+    display: flex;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+    justify-content: center;
+    position: relative;
+    z-index: 1;
+  }
+  .badge {
+    padding: 0.4rem 1rem;
+    border-radius: 100px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    border: 1px solid var(--border);
+    background: var(--surface);
+  }
+  .badge.blue { border-color: rgba(10,132,255,0.4); color: var(--accent); }
+  .badge.green { border-color: rgba(48,209,88,0.4); color: var(--accent2); }
+  .badge.purple { border-color: rgba(110,92,230,0.4); color: var(--gradient1); }
+
+  /* Stats */
+  .stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 1.5rem;
+    max-width: 900px;
+    margin: 3rem auto 0;
+    padding: 0 2rem;
+    position: relative;
+    z-index: 1;
+  }
+  .stat {
+    text-align: center;
+    padding: 1.5rem;
+    background: var(--surface);
+    border-radius: 16px;
+    border: 1px solid var(--border);
+  }
+  .stat .num {
+    font-size: 2.5rem;
+    font-weight: 800;
+    background: linear-gradient(135deg, var(--accent) 0%, var(--gradient1) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+  .stat .label { color: var(--text2); font-size: 0.9rem; margin-top: 0.25rem; }
+
+  /* Sections */
+  section {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 5rem 2rem;
+  }
+  section h2 {
+    font-size: clamp(2rem, 4vw, 3rem);
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    margin-bottom: 0.5rem;
+  }
+  section .subtitle {
+    color: var(--text2);
+    font-size: 1.1rem;
+    margin-bottom: 3rem;
+    max-width: 600px;
+  }
+
+  /* Phone frame */
+  .phone-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 2rem;
+    justify-items: center;
+  }
+  .phone-pair {
+    display: flex;
+    gap: 1.5rem;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+  .phone-frame {
+    width: 280px;
+    background: var(--surface);
+    border-radius: 32px;
+    padding: 12px;
+    border: 1px solid var(--border);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+  }
+  .phone-frame:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 20px 60px rgba(0,0,0,0.4);
+  }
+  .phone-frame img {
+    width: 100%;
+    border-radius: 22px;
+    display: block;
+  }
+  .phone-label {
+    text-align: center;
+    margin-top: 1rem;
+    font-weight: 600;
+    font-size: 0.95rem;
+  }
+  .phone-label .mode {
+    color: var(--text2);
+    font-weight: 400;
+    font-size: 0.8rem;
+  }
+
+  /* Component cards */
+  .component-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: 2rem;
+  }
+  .component-card {
+    background: var(--surface);
+    border-radius: 20px;
+    border: 1px solid var(--border);
+    overflow: hidden;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+  }
+  .component-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 16px 48px rgba(0,0,0,0.3);
+  }
+  .component-card .preview {
+    background: var(--surface2);
+    padding: 1.5rem;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 200px;
+  }
+  .component-card .preview img {
+    max-width: 100%;
+    max-height: 300px;
+    border-radius: 8px;
+  }
+  .component-card .info {
+    padding: 1.25rem;
+  }
+  .component-card .info h3 {
+    font-size: 1.1rem;
+    font-weight: 700;
+    margin-bottom: 0.25rem;
+  }
+  .component-card .info p {
+    color: var(--text2);
+    font-size: 0.85rem;
+  }
+
+  /* Theme comparison */
+  .theme-compare {
+    display: flex;
+    gap: 2rem;
+    justify-content: center;
+    flex-wrap: wrap;
+    margin-bottom: 3rem;
+  }
+  .theme-compare .phone-frame { width: 300px; }
+
+  /* Feature section */
+  .feature-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 2rem;
+  }
+  .feature-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 2rem;
+  }
+  .feature-card .icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    margin-bottom: 1rem;
+  }
+  .feature-card .icon.blue { background: rgba(10,132,255,0.15); }
+  .feature-card .icon.green { background: rgba(48,209,88,0.15); }
+  .feature-card .icon.purple { background: rgba(110,92,230,0.15); }
+  .feature-card .icon.orange { background: rgba(255,159,10,0.15); }
+  .feature-card h3 { font-size: 1.15rem; margin-bottom: 0.5rem; }
+  .feature-card p { color: var(--text2); font-size: 0.9rem; }
+
+  /* Architecture */
+  .arch-diagram {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1rem;
+    margin-top: 2rem;
+  }
+  .arch-box {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 1.5rem;
+    text-align: center;
+  }
+  .arch-box h4 { font-size: 0.95rem; margin-bottom: 0.5rem; }
+  .arch-box p { font-size: 0.8rem; color: var(--text2); }
+  .arch-box.core { border-color: rgba(10,132,255,0.4); }
+  .arch-box.comp { border-color: rgba(48,209,88,0.4); }
+  .arch-box.views { border-color: rgba(110,92,230,0.4); }
+  .arch-box.demo { border-color: rgba(255,159,10,0.4); }
+
+  /* Full-width screens */
+  .screen-scroll {
+    display: flex;
+    gap: 2rem;
+    overflow-x: auto;
+    padding: 1rem 0 2rem;
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+  }
+  .screen-scroll::-webkit-scrollbar { height: 6px; }
+  .screen-scroll::-webkit-scrollbar-track { background: var(--surface); border-radius: 3px; }
+  .screen-scroll::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+  .screen-scroll .phone-frame {
+    flex-shrink: 0;
+    scroll-snap-align: center;
+  }
+
+  /* Divider */
+  .divider {
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--border), transparent);
+    max-width: 1400px;
+    margin: 0 auto;
+  }
+
+  /* Footer */
+  footer {
+    text-align: center;
+    padding: 3rem 2rem;
+    color: var(--text2);
+    font-size: 0.9rem;
+  }
+  footer a { color: var(--accent); text-decoration: none; }
+
+  @media (max-width: 768px) {
+    .arch-diagram { grid-template-columns: repeat(2, 1fr); }
+    .phone-frame { width: 240px; }
+    .theme-compare .phone-frame { width: 260px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- HERO -->
+<div class="hero">
+  <h1>NiceViews</h1>
+  <p class="tagline">A comprehensive SwiftUI component library with 27+ reusable UI components, dual theme support, and snapshot-tested visual consistency.</p>
+  <div class="badge-row">
+    <span class="badge blue">SwiftUI</span>
+    <span class="badge green">iOS 18.5+</span>
+    <span class="badge purple">27+ Components</span>
+  </div>
+  <div class="stats">
+    <div class="stat"><div class="num">27+</div><div class="label">UI Components</div></div>
+    <div class="stat"><div class="num">75+</div><div class="label">Snapshot Tests</div></div>
+    <div class="stat"><div class="num">2</div><div class="label">Theme Modes</div></div>
+    <div class="stat"><div class="num">58</div><div class="label">Swift Files</div></div>
+  </div>
+</div>
+
+<!-- SIMULATOR TOUR — Real iPhone 17 Pro -->
+<section>
+  <h2>Live Simulator Tour</h2>
+  <p class="subtitle">Real screenshots captured via XCUITest automation on iPhone 17 Pro — navigating through every section of the app.</p>
+  <div class="screen-scroll">
+    <div>
+      <div class="phone-frame"><img src="images/01_main_menu.png" alt="Main Menu"></div>
+      <div class="phone-label">Main Menu<br><span class="mode">iPhone 17 Pro</span></div>
+    </div>
+    <div>
+      <div class="phone-frame"><img src="images/02_components_catalog.png" alt="Components Catalog"></div>
+      <div class="phone-label">Components Catalog<br><span class="mode">All component categories</span></div>
+    </div>
+    <div>
+      <div class="phone-frame"><img src="images/03_components_catalog_scrolled.png" alt="Components Scrolled"></div>
+      <div class="phone-label">Components Catalog<br><span class="mode">Scrolled</span></div>
+    </div>
+    <div>
+      <div class="phone-frame"><img src="images/04_views_catalog.png" alt="Views Catalog"></div>
+      <div class="phone-label">Views Catalog<br><span class="mode">Full-screen examples</span></div>
+    </div>
+    <div>
+      <div class="phone-frame"><img src="images/05_chat_experience.png" alt="Chat Experience"></div>
+      <div class="phone-label">Chat Experience<br><span class="mode">AI content explorer</span></div>
+    </div>
+    <div>
+      <div class="phone-frame"><img src="images/06_component_playground.png" alt="Component Playground"></div>
+      <div class="phone-label">Component Playground<br><span class="mode">Live customization</span></div>
+    </div>
+    <div>
+      <div class="phone-frame"><img src="images/07_component_playground_scrolled.png" alt="Playground Scrolled"></div>
+      <div class="phone-label">Playground Preview<br><span class="mode">Real network images</span></div>
+    </div>
+    <div>
+      <div class="phone-frame"><img src="images/08_animation_showcase.png" alt="Animation Showcase"></div>
+      <div class="phone-label">Animation Showcase<br><span class="mode">Loading, flip, spring</span></div>
+    </div>
+    <div>
+      <div class="phone-frame"><img src="images/10_component_states.png" alt="Component States"></div>
+      <div class="phone-label">Component States<br><span class="mode">Normal, loading, error</span></div>
+    </div>
+    <div>
+      <div class="phone-frame"><img src="images/11_component_states_scrolled.png" alt="States Scrolled"></div>
+      <div class="phone-label">Media Card States<br><span class="mode">Available, loading, error</span></div>
+    </div>
+    <div>
+      <div class="phone-frame"><img src="images/15_home_view.png" alt="Home View"></div>
+      <div class="phone-label">Home View<br><span class="mode">Hero + tab bar</span></div>
+    </div>
+    <div>
+      <div class="phone-frame"><img src="images/16_home_view_scrolled.png" alt="Home Scrolled"></div>
+      <div class="phone-label">Home View<br><span class="mode">Recently Played</span></div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- THEME SYSTEM — Real Simulator -->
+<section>
+  <h2>Dual Theme Support</h2>
+  <p class="subtitle">Every component adapts seamlessly between light and dark mode. Real simulator captures of the same screens.</p>
+  <div class="theme-compare">
+    <div>
+      <div class="phone-frame" style="background:#f5f5f7;border-color:#d2d2d7"><img src="images/01_main_menu.png" alt="Light Mode"></div>
+      <div class="phone-label">Light Mode<br><span class="mode">iPhone 17 Pro Simulator</span></div>
+    </div>
+    <div>
+      <div class="phone-frame"><img src="images/12_dark_mode_main.png" alt="Dark Mode"></div>
+      <div class="phone-label">Dark Mode<br><span class="mode">iPhone 17 Pro Simulator</span></div>
+    </div>
+  </div>
+  <div class="theme-compare">
+    <div>
+      <div class="phone-frame" style="background:#f5f5f7;border-color:#d2d2d7"><img src="images/02_components_catalog.png" alt="Components Light"></div>
+      <div class="phone-label">Components Catalog — Light</div>
+    </div>
+    <div>
+      <div class="phone-frame"><img src="images/13_dark_components_catalog.png" alt="Components Dark"></div>
+      <div class="phone-label">Components Catalog — Dark</div>
+    </div>
+  </div>
+  <div class="theme-compare">
+    <div>
+      <div class="phone-frame" style="background:#f5f5f7;border-color:#d2d2d7"><img src="images/testHomeView2_light.png" alt="Home V2 Light"></div>
+      <div class="phone-label">Home V2 — Light</div>
+    </div>
+    <div>
+      <div class="phone-frame"><img src="images/testHomeView2_dark.png" alt="Home V2 Dark"></div>
+      <div class="phone-label">Home V2 — Dark</div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- COMPONENTS -->
+<section>
+  <h2>Component Library</h2>
+  <p class="subtitle">Enum-driven sizing, style variants, optional callbacks, and @ViewBuilder generics — consistent patterns across all 27+ components.</p>
+  <div class="component-grid">
+
+    <div class="component-card">
+      <div class="preview"><img src="images/testMediaCardSizes_light.png" alt="Media Card Sizes"></div>
+      <div class="info"><h3>MediaCard</h3><p>Album/song cards with small, medium, large sizing via MediaCardSize enum. Rounded corners, image overlay, and subtitle support.</p></div>
+    </div>
+
+    <div class="component-card">
+      <div class="preview"><img src="images/testActionButton_light.png" alt="Action Buttons"></div>
+      <div class="info"><h3>ActionButton</h3><p>Primary, secondary, and text button styles. Supports icon + title combos with optional action callbacks.</p></div>
+    </div>
+
+    <div class="component-card">
+      <div class="preview"><img src="images/testStatusBadge_light.png" alt="Status Badges"></div>
+      <div class="info"><h3>StatusBadge</h3><p>LIVE, NEW, PRO, TRENDING badges with color-coded styles via BadgeStyle enum.</p></div>
+    </div>
+
+    <div class="component-card">
+      <div class="preview"><img src="images/testUserAvatar_light.png" alt="User Avatars"></div>
+      <div class="info"><h3>UserAvatar</h3><p>Profile pictures in small, medium, and large sizes via AvatarSize enum. Initials fallback with customizable colors.</p></div>
+    </div>
+
+    <div class="component-card">
+      <div class="preview"><img src="images/testListItem_light.png" alt="List Items"></div>
+      <div class="info"><h3>ListItem</h3><p>Generic list rows with image, title, subtitle. Supports selection states, loading indicators, and trailing accessories.</p></div>
+    </div>
+
+    <div class="component-card">
+      <div class="preview"><img src="images/testHeroSection_light.png" alt="Hero Section"></div>
+      <div class="info"><h3>HeroSection</h3><p>Featured content banner with background image, badge overlay, title, subtitle, and action buttons.</p></div>
+    </div>
+
+    <div class="component-card">
+      <div class="preview"><img src="images/testSearchBar_light.png" alt="Search Bar"></div>
+      <div class="info"><h3>SearchBar</h3><p>iOS-native search input with placeholder text and binding. Adaptive theming for light/dark mode.</p></div>
+    </div>
+
+    <div class="component-card">
+      <div class="preview"><img src="images/testBottomTabBar_light.png" alt="Bottom Tab Bar"></div>
+      <div class="info"><h3>BottomTabBar</h3><p>Custom tab navigation with SF Symbols, selection state, and AnyView type erasure for dynamic destinations.</p></div>
+    </div>
+
+    <div class="component-card">
+      <div class="preview"><img src="images/testIconButton_light.png" alt="Icon Button"></div>
+      <div class="info"><h3>IconButton</h3><p>Compact icon-only button with SF Symbol support, ideal for toolbars and inline actions.</p></div>
+    </div>
+
+    <div class="component-card">
+      <div class="preview"><img src="images/testSectionHeader_light.png" alt="Section Header"></div>
+      <div class="info"><h3>SectionHeader</h3><p>Section title with optional "See All" trailing action. Used across Home, Explore, and Library views.</p></div>
+    </div>
+
+    <div class="component-card">
+      <div class="preview"><img src="images/testMediaCardGrid_light.png" alt="Media Card Grid"></div>
+      <div class="info"><h3>Media Card Grid</h3><p>Responsive grid layout showing multiple MediaCards in a LazyVGrid arrangement.</p></div>
+    </div>
+
+    <div class="component-card">
+      <div class="preview"><img src="images/testListItemVariations_light.png" alt="List Item Variations"></div>
+      <div class="info"><h3>ListItem Variations</h3><p>Multiple list item configurations: with subtitles, icons, trailing info, and different content layouts.</p></div>
+    </div>
+
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- INTERACTIVE FEATURES -->
+<section>
+  <h2>Interactive Features</h2>
+  <p class="subtitle">Beyond static components — animations, state management, playground customization, and a chat-driven content explorer.</p>
+  <div class="screen-scroll">
+    <div>
+      <div class="phone-frame"><img src="images/08_animation_showcase.png" alt="Animations"></div>
+      <div class="phone-label">Animation Showcase<br><span class="mode">iPhone 17 Pro</span></div>
+    </div>
+    <div>
+      <div class="phone-frame"><img src="images/09_animation_showcase_scrolled.png" alt="Animations Scrolled"></div>
+      <div class="phone-label">Parallax & Transitions<br><span class="mode">iPhone 17 Pro</span></div>
+    </div>
+    <div>
+      <div class="phone-frame"><img src="images/10_component_states.png" alt="States"></div>
+      <div class="phone-label">Component States<br><span class="mode">iPhone 17 Pro</span></div>
+    </div>
+    <div>
+      <div class="phone-frame"><img src="images/11_component_states_scrolled.png" alt="States Scrolled"></div>
+      <div class="phone-label">Media Card States<br><span class="mode">iPhone 17 Pro</span></div>
+    </div>
+    <div>
+      <div class="phone-frame"><img src="images/05_chat_experience.png" alt="Chat"></div>
+      <div class="phone-label">Chat Experience<br><span class="mode">iPhone 17 Pro</span></div>
+    </div>
+    <div>
+      <div class="phone-frame"><img src="images/06_component_playground.png" alt="Playground"></div>
+      <div class="phone-label">Component Playground<br><span class="mode">iPhone 17 Pro</span></div>
+    </div>
+    <div>
+      <div class="phone-frame"><img src="images/07_component_playground_scrolled.png" alt="Playground Preview"></div>
+      <div class="phone-label">Live Preview<br><span class="mode">Real network image</span></div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- FEATURES -->
+<section>
+  <h2>Architecture & Design</h2>
+  <p class="subtitle">Protocol-first, enum-driven, composable. Every component follows consistent patterns.</p>
+  <div class="feature-grid">
+    <div class="feature-card">
+      <div class="icon blue">&#9881;</div>
+      <h3>Enum-Driven Sizing</h3>
+      <p>MediaCardSize, AvatarSize, ButtonStyle — all components expose their variants through Swift enums for type-safe configuration.</p>
+    </div>
+    <div class="feature-card">
+      <div class="icon green">&#10004;</div>
+      <h3>Snapshot Testing</h3>
+      <p>75+ visual regression tests using Point-Free's swift-snapshot-testing. Every component tested in both light and dark mode.</p>
+    </div>
+    <div class="feature-card">
+      <div class="icon purple">&#9734;</div>
+      <h3>Protocol-First</h3>
+      <p>ComponentConfigurable protocol with associated config types. BaseViews provide generic composition foundations.</p>
+    </div>
+    <div class="feature-card">
+      <div class="icon orange">&#9728;</div>
+      <h3>Theme System</h3>
+      <p>ThemeManager as @EnvironmentObject with @Published dark mode state. Automatic UITraitCollection sync.</p>
+    </div>
+  </div>
+
+  <div class="arch-diagram" style="margin-top:3rem">
+    <div class="arch-box core">
+      <h4>Core Layer</h4>
+      <p>BaseViews, ViewModifiers, ConfigurableComponents, ContentFactory</p>
+    </div>
+    <div class="arch-box comp">
+      <h4>Components</h4>
+      <p>27+ reusable views: MediaCard, ActionButton, ListItem, HeroSection...</p>
+    </div>
+    <div class="arch-box views">
+      <h4>Test Views</h4>
+      <p>Full-screen compositions: Home, Explore, Library, Profile</p>
+    </div>
+    <div class="arch-box demo">
+      <h4>Demo Views</h4>
+      <p>Interactive showcases: Playground, Chat, Animation, Catalogs</p>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- FULL SCREEN GALLERY -->
+<section>
+  <h2>Full-Screen Gallery</h2>
+  <p class="subtitle">Complete rendered views — real simulator captures alongside snapshot test renders for full coverage.</p>
+  <div class="screen-scroll">
+    <div>
+      <div class="phone-frame"><img src="images/15_home_view.png" alt="Home Simulator"></div>
+      <div class="phone-label">Home View<br><span class="mode">iPhone 17 Pro</span></div>
+    </div>
+    <div>
+      <div class="phone-frame"><img src="images/testHomeView_dark.png" alt="Home Dark"></div>
+      <div class="phone-label">Home View<br><span class="mode">Dark — Snapshot</span></div>
+    </div>
+    <div>
+      <div class="phone-frame"><img src="images/testExploreView_light.png" alt="Explore Light"></div>
+      <div class="phone-label">Explore<br><span class="mode">Light — Snapshot</span></div>
+    </div>
+    <div>
+      <div class="phone-frame"><img src="images/testExploreView_dark.png" alt="Explore Dark"></div>
+      <div class="phone-label">Explore<br><span class="mode">Dark — Snapshot</span></div>
+    </div>
+    <div>
+      <div class="phone-frame"><img src="images/testProfileView_light.png" alt="Profile Light"></div>
+      <div class="phone-label">Profile<br><span class="mode">Light — Snapshot</span></div>
+    </div>
+    <div>
+      <div class="phone-frame"><img src="images/testProfileView_dark.png" alt="Profile Dark"></div>
+      <div class="phone-label">Profile<br><span class="mode">Dark — Snapshot</span></div>
+    </div>
+    <div>
+      <div class="phone-frame"><img src="images/testLibraryView_light.png" alt="Library Light"></div>
+      <div class="phone-label">Library<br><span class="mode">Light — Snapshot</span></div>
+    </div>
+    <div>
+      <div class="phone-frame"><img src="images/testLibraryView_dark.png" alt="Library Dark"></div>
+      <div class="phone-label">Library<br><span class="mode">Dark — Snapshot</span></div>
+    </div>
+    <div>
+      <div class="phone-frame"><img src="images/testExploreView2_light.png" alt="Explore V2 Light"></div>
+      <div class="phone-label">Explore V2<br><span class="mode">Light — Snapshot</span></div>
+    </div>
+    <div>
+      <div class="phone-frame"><img src="images/testExploreView2_dark.png" alt="Explore V2 Dark"></div>
+      <div class="phone-label">Explore V2<br><span class="mode">Dark — Snapshot</span></div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <p>NiceViews — Built with SwiftUI, tested with swift-snapshot-testing</p>
+  <p style="margin-top:0.5rem">iOS 18.5+ &middot; Swift 5 &middot; Xcode</p>
+</footer>
+
+</body>
+</html>
